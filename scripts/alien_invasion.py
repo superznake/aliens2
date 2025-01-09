@@ -1,4 +1,5 @@
 import sys
+from pathlib import Path
 
 from time import sleep
 
@@ -28,13 +29,15 @@ class AlienInvasion:
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
         self.aliens = pygame.sprite.Group()
-        self.stats = GameStats(self)
-
         self._create_fleet()
+        self.stats = GameStats(self)
+        ost_path = Path.cwd().parent / "assets" / "sound" / "ost.mp3"
+        self.ost = pygame.mixer.Sound(ost_path)
 
     def run_game(self):
         clock = pygame.time.Clock()
         while True:
+            self.ost.play()
             self._check_events()
             if self.stats.game_active:
                 self.ship.update()
