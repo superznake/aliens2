@@ -1,3 +1,4 @@
+import pickle
 import sys
 from pathlib import Path
 
@@ -77,7 +78,29 @@ class AlienInvasion:
             self.ship.moving_right = False
         elif event.key in self.settings.left:
             self.ship.moving_left = False
+        elif event.key == pygame.K_s:
+            self.save_game()
+        elif event.key == pygame.K_l:
+            self.load_game()
+        elif event.key == pygame.K_t:
+            self.settings.alien_speed *= 10
+            self.settings.bullet_width *= 10000
+            self.settings.bullet_speed *= 10
 
+    def save_game(self):
+        game_data = {"lives": self.stats.ships_left, "level": self.stats.level}
+        with open("save", "wb") as out_file:
+            pickle.dump(game_data, out_file)
+
+    def load_game(self):
+        with open("save", "rb") as in_file:
+            game_data = pickle.load(in_file)
+            self.stats.reset_stats()
+            self.stats.ships_left = game_data["lives"]
+            self.stats.level = game_data["level"]
+            self.bullets.empty()
+            self.aliens.empty()
+            self._create_fleet()
     def _fire_bullet(self):
         if len(self.bullets) < self.settings.bullets_allowed:
             self.pew_sound.play()
@@ -102,7 +125,6 @@ class AlienInvasion:
             sleep(0.5)
         else:
             self.stats.game_active = False
-            print(self.stats.score)
 
     def _update_bullets(self):
         for bullet in self.bullets.copy():
@@ -114,7 +136,6 @@ class AlienInvasion:
     def _check_bullet_alien_collisions(self):
         collisions = pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
         if collisions:
-            self.stats.score += 1
             self.kill_sound.play()
         if not self.aliens:
             self.bullets.empty()
@@ -129,7 +150,7 @@ class AlienInvasion:
         number_aliens_x = available_space_x // (2 * alien_width)
 
         ship_height = self.ship.rect.height
-        available_space_y = (self.settings.screen_height - (3* alien_height) - ship_height)
+        available_space_y = (self.settings.screen_height - (3 * alien_height) - ship_height)
         number_rows = available_space_y // (2 * alien_height)
 
         for row_number in range(number_rows):
