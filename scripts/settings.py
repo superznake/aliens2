@@ -30,3 +30,7 @@ class Settings:
         self.alien_speed = 1.0
         self.fleet_drop_speed = 10
         self.fleet_direction = 1  # 1 - right; -1 - left
+
+        # bonus
+        self.bonus_speed = 1.5
+        self.bonus_probability = 75

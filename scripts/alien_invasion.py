@@ -1,4 +1,5 @@
 import pickle
+import random
 import sys
 from pathlib import Path
 
@@ -11,6 +12,7 @@ from ship import Ship
 from bullet import Bullet
 from alien import Alien
 from game_stats import GameStats
+from bonus import Bonus
 
 
 class AlienInvasion:
@@ -30,6 +32,7 @@ class AlienInvasion:
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
         self.aliens = pygame.sprite.Group()
+        self.bonuses = pygame.sprite.Group()
         self._create_fleet()
         self.stats = GameStats(self)
         ost_path = Path.cwd().parent / "assets" / "sound" / "ost.mp3"
@@ -49,6 +52,7 @@ class AlienInvasion:
                 self.ship.update()
                 self._update_bullets()
                 self._update_aliens()
+                self._update_bonuses()
 
             self._update_screen()
 
@@ -133,10 +137,39 @@ class AlienInvasion:
         self.bullets.update()
         self._check_bullet_alien_collisions()
 
+    def _update_bonuses(self):
+        for bonus in self.bonuses.copy():
+            if bonus.rect.bottom >= self.settings.screen_height:
+                self.bonuses.remove(bonus)
+        self.bonuses.update()
+        self._check_bonus_ship_collisions()
+
+    def _check_bonus_ship_collisions(self):
+        collision = pygame.sprite.spritecollide(self.ship, self.bonuses, True)
+        if collision:
+            match collision[0].type:
+                case 0:
+                    self.stats.ships_left += 1
+
+                case 1:
+                    self.settings.bullets_allowed += 1
+
+                case 2:
+                    self.settings.bullet_width += 1
+
+                case 3:
+                    self.settings.ship_speed += 0.5
+
     def _check_bullet_alien_collisions(self):
         collisions = pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
         if collisions:
             self.kill_sound.play()
+            collision_source = list(collisions.values())[0]
+            if 100 - random.randint(1, 100) <= self.settings.bonus_probability:
+                bonus = Bonus(self)
+                bonus.rect.x = collision_source[0].rect.x
+                bonus.y = collision_source[0].rect.y
+                self.bonuses.add(bonus)
         if not self.aliens:
             self.bullets.empty()
             self.stats.level += 1
@@ -188,6 +221,8 @@ class AlienInvasion:
         self.ship.blitme()
         for bullet in self.bullets.sprites():
             bullet.draw_bullet()
+        for bonus in self.bonuses.sprites():
+            bonus.draw_bonus()
         self.aliens.draw(self.screen)
 
         pygame.display.flip()
