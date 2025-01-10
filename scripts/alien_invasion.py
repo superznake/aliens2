@@ -32,12 +32,17 @@ class AlienInvasion:
         self._create_fleet()
         self.stats = GameStats(self)
         ost_path = Path.cwd().parent / "assets" / "sound" / "ost.mp3"
-        self.ost = pygame.mixer.Sound(ost_path)
+        pygame.mixer.music.load(ost_path)
+        pygame.mixer.music.set_volume(0.5)
+        pygame.mixer.music.play(-1)
+        self.pew_sound = pygame.mixer.Sound(ost_path.parent / "pew.mp3")
+        self.pew_sound.set_volume(0.4)
+        self.kill_sound = pygame.mixer.Sound(ost_path.parent / "kill.mp3")
+        self.death_sound = pygame.mixer.Sound(ost_path.parent / "death.mp3")
 
     def run_game(self):
         clock = pygame.time.Clock()
         while True:
-            self.ost.play()
             self._check_events()
             if self.stats.game_active:
                 self.ship.update()
@@ -75,6 +80,7 @@ class AlienInvasion:
 
     def _fire_bullet(self):
         if len(self.bullets) < self.settings.bullets_allowed:
+            self.pew_sound.play()
             new_bullet = Bullet(self)
             self.bullets.add(new_bullet)
 
@@ -86,6 +92,7 @@ class AlienInvasion:
         self._check_aliens_bottom()
 
     def _ship_hit(self):
+        self.death_sound.play()
         if self.stats.ships_left > 0:
             self.stats.ships_left -= 1
             self.aliens.empty()
@@ -108,8 +115,11 @@ class AlienInvasion:
         collisions = pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
         if collisions:
             self.stats.score += 1
+            self.kill_sound.play()
         if not self.aliens:
             self.bullets.empty()
+            self.stats.level += 1
+            self.settings.alien_speed += self.stats.level * 0.05
             self._create_fleet()
 
     def _create_fleet(self):
