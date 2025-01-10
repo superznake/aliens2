@@ -1,6 +1,14 @@
+import os
+import sys
+
 import pygame
 
 from pathlib import *
+
+
+def resource_path(relative_path):
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_path, relative_path)
 
 
 class Ship:
@@ -9,7 +17,8 @@ class Ship:
         self.screen = ai_game.screen
         self.screen_rect = ai_game.screen.get_rect()
 
-        img_path = Path.cwd().parent / "assets" / "images" / "ship.png"
+        # img_path = PurePath("assets/images/ship.png")
+        img_path = resource_path("images/ship.png")
         self.image = pygame.image.load(img_path)
         self.image = pygame.transform.scale(
             self.image, (ai_game.screen.get_width()/15, ai_game.screen.get_height()/15))

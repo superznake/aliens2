@@ -33,4 +33,4 @@ class Settings:
 
         # bonus
         self.bonus_speed = 1.5
-        self.bonus_probability = 75
+        self.bonus_probability = 25

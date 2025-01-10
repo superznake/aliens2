@@ -1,7 +1,16 @@
+import os
+import sys
+
 import pygame
+
 
 from pygame.sprite import Sprite
 from pathlib import *
+
+
+def resource_path(relative_path):
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_path, relative_path)
 
 
 class Alien(Sprite):
@@ -10,7 +19,7 @@ class Alien(Sprite):
         self.screen = ai_game.screen
         self.settings = ai_game.settings
 
-        img_path = Path.cwd().parent / "assets" / "images" / "alien.png"
+        img_path = resource_path("images/alien.png")
         self.image = pygame.image.load(img_path)
         self.image = pygame.transform.scale(
             self.image, (ai_game.screen.get_width() / 15, ai_game.screen.get_height() / 15))
