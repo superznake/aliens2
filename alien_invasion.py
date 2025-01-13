@@ -1,24 +1,18 @@
-import os
 import pickle
 import random
 import sys
-from pathlib import PurePath
 
 from time import sleep
 
 import pygame
 
-from scripts.settings import Settings
-from scripts.ship import Ship
-from scripts.bullet import Bullet
-from scripts.alien import Alien
-from scripts.game_stats import GameStats
-from scripts.bonus import Bonus
-
-
-def resource_path(relative_path):
-    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
-    return os.path.join(base_path, relative_path)
+from settings import Settings
+from ship import Ship
+from bullet import Bullet
+from alien import Alien
+from game_stats import GameStats
+from bonus import Bonus
+from path_fix import resource_path
 
 
 class AlienInvasion:
@@ -107,14 +101,18 @@ class AlienInvasion:
             pickle.dump(game_data, out_file)
 
     def load_game(self):
-        with open("save", "rb") as in_file:
-            game_data = pickle.load(in_file)
-            self.stats.reset_stats()
-            self.stats.ships_left = game_data["lives"]
-            self.stats.level = game_data["level"]
-            self.bullets.empty()
-            self.aliens.empty()
-            self._create_fleet()
+        try:
+            with open("save", "rb") as in_file:
+                game_data = pickle.load(in_file)
+                self.stats.reset_stats()
+                self.stats.ships_left = game_data["lives"]
+                self.stats.level = game_data["level"]
+                self.bullets.empty()
+                self.aliens.empty()
+                self._create_fleet()
+        except:
+            ...
+
     def _fire_bullet(self):
         if len(self.bullets) < self.settings.bullets_allowed:
             self.pew_sound.play()
